@@ -2,11 +2,13 @@
 
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
+// Yeni Component: VerifyLinkContent
 function VerifyLinkContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -20,12 +22,16 @@ function VerifyLinkContent() {
     window.location.href = `/api/auth/verify-link?token=${token}`;
   }, [router, searchParams]);
 
-  return (
-    <div className='container text-center mt-5'>
-      <div className='spinner-border text-primary' role='status' />
-      <p className='mt-3'>Doğrulama yapılıyor, lütfen bekleyin...</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className='container text-center mt-5'>
+        <div className='spinner-border text-primary' role='status' />
+        <p className='mt-3'>Doğrulama yapılıyor, lütfen bekleyin...</p>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 export default function VerifyLinkPage() {
