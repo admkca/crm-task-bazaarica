@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
-export default function VerifyLinkPage() {
+function VerifyLinkContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -24,5 +25,13 @@ export default function VerifyLinkPage() {
       <div className='spinner-border text-primary' role='status' />
       <p className='mt-3'>Doğrulama yapılıyor, lütfen bekleyin...</p>
     </div>
+  );
+}
+
+export default function VerifyLinkPage() {
+  return (
+    <Suspense fallback={<div>Yükleniyor...</div>}>
+      <VerifyLinkContent />
+    </Suspense>
   );
 }
