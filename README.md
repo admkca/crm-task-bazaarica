@@ -1,143 +1,136 @@
-CRM Task Uygulaması - Detaylı Teknik Döküman
+# CRM Task Uygulaması - Detaylı Teknik Döküman
 
-Genel Proje Tanımı
+## 📌 Genel Proje Tanımı
 
-Bu proje, kullanıcı kaydı, e-posta doğrulaması, JWT tabanlı oturum yönetimi ve kullanıcıya özel görev (task) yönetimi sunan bir CRM Task Uygulamasıdır.
+Bu proje, kullanıcı kaydı, e-posta doğrulaması, JWT tabanlı oturum yönetimi ve kullanıcıya özel görev (task) yönetimi sunan **CRM Task Uygulamasıdır**.
 
-Kullanıcılar, kayıt olduklarında e-posta adreslerine bir doğrulama kodu ve doğrulama linki gönderilir. Kodla veya linkle doğrulama başarılı olursa sisteme giriş yapabilirler. Ardından görev ekleme, listeleme, düzenleme ve silme gibi işlemleri gerçekleştirirler.
+- Kullanıcılar kayıt olduklarında e-posta adreslerine bir doğrulama **kodu** ve **doğrulama linki** gönderilir.
+- Kod veya link aracılığıyla doğrulama başarılı olursa kullanıcı sisteme giriş yapabilir.
+- Ardından görev ekleme, listeleme, düzenleme ve silme işlemleri yapılabilir.
 
-Kullanılan Teknolojiler (Tech Stack)
+---
 
-Next.js (App Router yapısı - Fullstack)
+## 🛠 Kullanılan Teknolojiler (Tech Stack)
 
-React.js (Client Components)
+| Teknoloji | Kullanım Amacı |
+|:----------|:---------------|
+| Next.js (App Router) | Fullstack uygulama çatısı |
+| React.js | Client taraflı sayfa ve bileşen yönetimi |
+| MySQL | Veritabanı yönetimi |
+| DBeaver | Yerel veritabanı yönetimi aracı |
+| JWT (jsonwebtoken) | Oturum yönetimi |
+| Nodemailer | E-posta gönderimi |
+| Bootstrap 5 | Responsive tasarım |
+| PlanetScale (opsiyonel) | Üretim ortamı veritabanı (scalable MySQL) |
 
-MySQL (Database)
+---
 
-DBeaver (Yerel veritabanı görüntüleyici)
+## 📂 Proje Modülleri ve Açıklamaları
 
-JWT (jsonwebtoken) (Oturum yönetimi)
+### 1. Kullanıcı Kayıt (/api/auth/register.js)
+- Kullanıcı email ve şifre ile kayıt olur.
+- Şifre **bcrypt** ile hashlenir.
+- E-posta adresine **doğrulama kodu** ve **doğrulama linki** gönderilir.
+- Kullanıcı **is_verified = false** olarak kaydedilir.
 
-Nodemailer (E-posta gönderimi)
+> Kullanılan: MySQL, bcrypt, nodemailer, jwt
 
-Bootstrap 5 (Responsive tasarım)
+---
 
-PlanetScale (Canlı veritabanı - opsiyonel)
+### 2. Kod ile Doğrulama (/api/auth/verify-code.js)
+- Kullanıcı 6 haneli doğrulama kodunu girer.
+- Kod doğrulanırsa:
+  - Kullanıcı **is_verified = true** yapılır.
+  - JWT Token üretilir ve Cookie olarak gönderilir.
 
-Proje Modülleri ve Açıklamaları
+> Kullanılan: MySQL, jwt, cookie
 
-1. Kullanıcı Kayıt Sistemi (/api/auth/register.js)
+---
 
-Yeni kullanıcı kayıt olur.
+### 3. Link ile Doğrulama (/api/auth/verify-link.js)
+- Kullanıcı doğrulama linkine tıklar.
+- JWT çözülerek kullanıcı bulunur ve doğrulama yapılır.
+- Başarılı ise kullanıcı **dashboard** sayfasına yönlendirilir.
 
-Email'e bir doğrulama kodu ve doğrulama linki gönderilir.
+> Kullanılan: jwt, cookie, MySQL
 
-Şifreler bcrypt ile hashlenir.
+---
 
-Kullanıcının is_verified değeri başta false olur.
+### 4. Kullanıcı Girişi (/api/auth/login.js)
+- Email ve şifre ile giriş yapılır.
+- Kullanıcı doğrulandıysa:
+  - JWT Token üretilir ve Cookie'ye yazılır.
+- Doğrulanmamışsa:
+  - "Lütfen hesabınızı doğrulayın." hatası döner.
 
-Kullanılanlar: MySQL, bcrypt, nodemailer, jwt
+> Kullanılan: MySQL, bcrypt, jwt, cookie
 
-2. Kullanıcı Doğrulama (Kod) (/api/auth/verify-code.js)
+---
 
-Kullanıcı email adresine gelen 6 haneli kodu girerek hesabını doğrular.
+### 5. Oturum Bilgisi (/api/auth/me.js)
+- Cookie içindeki JWT Token çözülenir.
+- Kullanıcı bilgileri döndürülür.
 
-Doğrulama başarılı olursa JWT token üretilir ve cookie olarak kullanıcıya gönderilir.
+---
 
-Kullanılanlar: MySQL, jwt, cookie
+### 6. Çıkış Yapma (/api/auth/logout.js)
+- Kullanıcının Cookie'sindeki JWT token temizlenir.
+- Oturum kapatılır.
 
-3. Kullanıcı Doğrulama (Link) (/api/auth/verify-link.js)
+---
 
-Kullanıcıya gönderilen linke tıkladığında, token doğrulanır ve kullanıcı otomatik doğrulanır.
+### 7. Kod Yeniden Gönderme (/api/auth/resend-code.js)
+- Kullanıcıya yeni bir doğrulama kodu gönderilir.
+- Eski kod güncellenir.
 
-Kullanıcı doğrulandıktan sonra dashboard sayfasına yönlendirilir.
+---
 
-Kullanılanlar: jwt, cookie, MySQL
+## 📝 Görev (Task) Yönetim Modülleri
 
-4. Kullanıcı Girişi (/api/auth/login.js)
+### 8. Görev Ekleme (/api/tasks/create.js)
+- Kullanıcı görev başlığı ve açıklaması girer.
+- Görev, oturumdaki kullanıcıya bağlı olarak veritabanına kaydedilir.
 
-Email ve şifre ile giriş yapılır.
+---
 
-Kullanıcı daha önce doğrulandıysa JWT token verilir.
+### 9. Görev Listeleme (/api/tasks/list.js)
+- Yalnızca oturum açmış kullanıcıya ait görevler listelenir.
 
-Doğrulanmamışsa, kullanıcıya "Lütfen hesabınızı doğrulayın" mesajı verilir.
+---
 
-Kullanılanlar: MySQL, bcrypt, jwt, cookie
+### 10. Görev Düzenleme (/api/tasks/update.js)
+- Seçilen görev güncellenir.
 
-5. Oturum Bilgisi (/api/auth/me.js)
+---
 
-Kullanıcının oturumunun olup olmadığı kontrol edilir.
+### 11. Görev Silme (/api/tasks/delete.js)
+- Seçilen görev veritabanından kalıcı olarak silinir.
 
-Cookie'deki JWT token çözülerek kullanıcı bilgisi verilir.
+---
 
-6. Çıkış Yapma (/api/auth/logout.js)
+## 👥 Frontend Sayfa Akışı
 
-Cookie'deki token boşaltılır.
+| Sayfa | Açıklama |
+|:------|:---------|
+| `/login` | Kullanıcı girişi |
+| `/register` | Kullanıcı kaydı |
+| `/verify` | Kod ile doğrulama |
+| `/verify-link` | Link ile doğrulama |
+| `/dashboard` | Görev yönetim ekranı |
 
-Kullanıcı sistemden çıkar.
+---
 
-7. Kod Yeniden Gönderme (/api/auth/resend-code.js)
+## 🛠 Ekstra Kullanılanlar
 
-Email adresine yeni doğrulama kodu gönderilir.
+- **Toastify:** Bildirim mesajları için.
+- **Bootstrap 5:** Responsive frontend tasarım için.
+- **Next.js App Router:** Yeni nesil dizin ve sayfa yönetimi için.
 
-Eski kodun üstüne yazılır.
+---
 
-Task (Görev) Modülleri
+## 🛡️ .env Örnek Yapısı
 
-8. Görev Ekleme (/api/tasks/create.js)
-
-Kullanıcı yeni bir görev başlığı ve açıklaması ekler.
-
-Oturumda olan kullanıcıya bağlı olarak veritabanına kaydedilir.
-
-9. Görev Listeleme (/api/tasks/list.js)
-
-Sadece oturumdaki kullanıcıya ait görevler listelenir.
-
-10. Görev Düzenleme (/api/tasks/update.js)
-
-Seçilen görevin başlığı ve açıklaması güncellenir.
-
-11. Görev Silme (/api/tasks/delete.js)
-
-Seçilen görev kalıcı olarak silinir.
-
-Frontend Akışı (Sayfalar)
-
-Sayfa
-
-Açıklama
-
-/login
-
-Kullanıcı girişi
-
-/register
-
-Kullanıcı kaydı
-
-/verify
-
-Kodla doğrulama
-
-/verify-link
-
-Link ile doğrulama
-
-/dashboard
-
-Kullanıcının görevlerini yönettiği sayfa
-
-Ekstra Kullanılanlar
-
-Toastify: Bildirim mesajları.
-
-Bootstrap: Responsive tasarım.
-
-App Router: Yeni nesil Next.js dizin yapısı.
-
-.env Örnek Yapısı
-
+```env
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=senin_passwordun
@@ -146,25 +139,34 @@ EMAIL_USER=senin.email@gmail.com
 EMAIL_PASS=uygulama_sifresi
 JWT_SECRET=senin_secret_token
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-Deployment
+---
 
-Github'a proje pushlandı.
+## 🚀 Deployment Bilgileri
 
-Vercel kullanılarak canlıya alındı.
+- Proje GitHub'a yüklendi.
+- Vercel üzerinden deployment yapıldı.
+- Vercel'de Environment Variables ayarlandı.
 
-Vercel'de Environment Variables ayarlanıp yayın yapıldı.
+---
 
-🔗 Genel Akış:
+## 🔗 Genel Akış Şeması
 
-Kullanıcı kaydını yapar.
+```mermaid
+flowchart TD
+    A[Kayıt Ol] --> B[Doğrulama Kodu Gönder]
+    B --> C{Kodu Gir}
+    C -- Başarılı --> D[JWT Token Üret ve Dashboard'a Yönlendir]
+    C -- Başarısız --> E[Hata Mesajı Göster]
+    D --> F[Tüm Görev İşlemleri: Ekle, Listele, Düzenle, Sil]
+```
 
-Email adresine kod ve link gider.
+---
 
-Kod girerek veya linke tıklayarak doğrulama yapar.
+## 🎯 Özet
 
-JWT token üretilir, kullanıcı dashboard'a alınır.
-
-Kullanıcı görev ekler, düzenler, siler.
-
-Oturum bilgisinde JWT token doğrulaması kullanılır.
+- Kullanıcılar, email doğrulaması ile güvenli giriş yapar.
+- JWT tabanlı oturum sistemi vardır.
+- Görev yönetimi tamamen kullanıcıya özeldir.
+- Sistem tamamen responsive ve güvenli çalışacak şekilde tasarlanmıştır.
